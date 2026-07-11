@@ -389,54 +389,79 @@ function Index() {
         </div>
       </div>
 
-      <div
-        ref={scrollerRef}
-        className="relative w-full overflow-x-auto overflow-y-hidden pb-16"
-        style={{ scrollbarWidth: "thin" }}
-      >
-        <div className="relative min-w-max px-6 pt-10">
-          {/* Rail */}
-          <div className="pointer-events-none absolute left-6 right-6 top-[168px] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="relative">
+        {/* Cross-fading era backdrop, sits behind the scrolling timeline */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          {BACKDROPS.map((b) => (
+            <img
+              key={b.src}
+              src={b.src}
+              alt=""
+              width={1280}
+              height={800}
+              loading="lazy"
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
+                b.src === activeBackdrop ? "opacity-25" : "opacity-0"
+              }`}
+              style={{ filter: "saturate(0.85)" }}
+            />
+          ))}
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/70 to-background" />
+        </div>
 
-          <ol className="relative flex items-stretch gap-6">
-            {EVENTS.map((e, i) => {
-              const meta = ERA_META[e.era];
-              const above = i % 2 === 0;
-              return (
-                <li
-                  key={`${e.year}-${e.title}`}
-                  className="relative flex w-[320px] shrink-0 flex-col sm:w-[360px]"
-                >
-                  {above ? (
-                    <>
-                      <EventCard event={e} meta={meta} />
-                      <div className="relative flex h-[72px] items-start justify-center">
-                        <div className={`h-full w-px ${meta.dot}`} />
-                        <span
-                          className={`absolute top-[64px] h-3 w-3 rounded-full ring-4 ring-background ${meta.dot}`}
-                        />
-                      </div>
-                      <YearLabel year={e.year} meta={meta} />
-                    </>
-                  ) : (
-                    <>
-                      <div className="min-h-[240px]" />
-                      <div className="relative flex h-[72px] items-end justify-center">
-                        <span
-                          className={`absolute top-0 h-3 w-3 rounded-full ring-4 ring-background ${meta.dot}`}
-                        />
-                        <div className={`h-full w-px ${meta.dot}`} />
-                      </div>
-                      <YearLabel year={e.year} meta={meta} />
-                      <EventCard event={e} meta={meta} className="mt-4" />
-                    </>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+        <div
+          ref={scrollerRef}
+          className="relative w-full overflow-x-auto overflow-y-hidden pb-16"
+          style={{ scrollbarWidth: "thin" }}
+        >
+          <div className="relative min-w-max px-6 pt-10">
+            {/* Rail */}
+            <div className="pointer-events-none absolute left-6 right-6 top-[300px] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+            <ol className="relative flex items-stretch gap-6">
+              {EVENTS.map((e, i) => {
+                const meta = ERA_META[e.era];
+                const above = i % 2 === 0;
+                return (
+                  <li
+                    key={`${e.year}-${e.title}-${i}`}
+                    className="relative flex w-[320px] shrink-0 flex-col sm:w-[360px]"
+                  >
+                    {above ? (
+                      <>
+                        <EventCard event={e} meta={meta} />
+                        <div className="relative flex h-[72px] items-start justify-center">
+                          <div className={`h-full w-px ${meta.dot}`} />
+                          <span
+                            className={`absolute top-[64px] h-3 w-3 rounded-full ring-4 ring-background ${meta.dot}`}
+                          />
+                        </div>
+                        <YearLabel year={e.year} meta={meta} />
+                      </>
+                    ) : (
+                      <>
+                        <div className="min-h-[372px]" />
+                        <div className="relative flex h-[72px] items-end justify-center">
+                          <span
+                            className={`absolute top-0 h-3 w-3 rounded-full ring-4 ring-background ${meta.dot}`}
+                          />
+                          <div className={`h-full w-px ${meta.dot}`} />
+                        </div>
+                        <YearLabel year={e.year} meta={meta} />
+                        <EventCard event={e} meta={meta} className="mt-4" />
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         </div>
       </div>
+
 
       <footer className="mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
