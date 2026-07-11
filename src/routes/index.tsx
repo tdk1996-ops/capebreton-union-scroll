@@ -513,18 +513,27 @@ function EventCard({
 }) {
   return (
     <article
-      className={`group relative flex min-h-[240px] flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${className}`}
+      className={`group relative flex min-h-[372px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${className}`}
     >
-      <div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${meta.chip}`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
-            {event.tag ?? meta.label}
-          </span>
-        </div>
-        <h3 className="mt-3 text-lg font-bold leading-snug text-card-foreground">
+      <div className="relative h-40 w-full overflow-hidden">
+        <img
+          src={event.image}
+          alt={event.imageAlt}
+          width={1280}
+          height={800}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-card/10 to-transparent" />
+        <span
+          className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur ${meta.chip}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+          {event.tag ?? meta.label}
+        </span>
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="text-lg font-bold leading-snug text-card-foreground">
           {event.title}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{event.body}</p>
@@ -532,3 +541,4 @@ function EventCard({
     </article>
   );
 }
+
