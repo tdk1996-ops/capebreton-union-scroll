@@ -424,7 +424,7 @@ function EventCard({
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${meta.chip}`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
-            {event.tag ?? meta === ERA_META.ibew ? event.tag ?? "IBEW 1852" : meta.label}
+            {event.tag ?? meta.label}
           </span>
         </div>
         <h3 className="mt-3 text-lg font-bold leading-snug text-card-foreground">
