@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import imgEarly from "@/assets/era-early.jpg";
+import imgCoal from "@/assets/era-coal.jpg";
+import imgSteel from "@/assets/era-steel.jpg";
+import imgIbew from "@/assets/era-ibew.jpg";
+import imgStorm from "@/assets/era-storm.jpg";
+import imgDavis from "@/assets/era-davis.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,6 +24,8 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: imgIbew },
+      { name: "twitter:image", content: imgIbew },
     ],
   }),
   component: Index,
@@ -31,7 +39,10 @@ interface TimelineEvent {
   body: string;
   era: Era;
   tag?: string;
+  image: string;
+  imageAlt: string;
 }
+
 
 const EVENTS: TimelineEvent[] = [
   {
