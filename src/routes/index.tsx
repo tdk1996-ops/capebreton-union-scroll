@@ -269,16 +269,29 @@ const ERA_META: Record<Era, { label: string; dot: string; chip: string; accent: 
   },
 };
 
+// Unique backdrop images in the order they first appear along the timeline.
+const BACKDROPS: { src: string; alt: string }[] = [
+  { src: imgEarly, alt: "Early Cape Breton miners" },
+  { src: imgCoal, alt: "Coal miners on a picket line" },
+  { src: imgSteel, alt: "Sydney steel plant at dusk" },
+  { src: imgDavis, alt: "William Davis memorial" },
+  { src: imgIbew, alt: "IBEW lineman on the Cape Breton coast" },
+  { src: imgStorm, alt: "Storm restoration line crew" },
+];
+
 function Index() {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
 
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
     const onScroll = () => {
       const max = el.scrollWidth - el.clientWidth;
-      setProgress(max > 0 ? el.scrollLeft / max : 0);
+      const p = max > 0 ? el.scrollLeft / max : 0;
+      setProgress(p);
+      setActiveIdx(Math.round(p * (EVENTS.length - 1)));
     };
     onScroll();
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -303,6 +316,9 @@ function Index() {
     if (!el) return;
     el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
   };
+
+  const activeBackdrop = EVENTS[activeIdx]?.image ?? imgIbew;
+
 
   return (
     <div
