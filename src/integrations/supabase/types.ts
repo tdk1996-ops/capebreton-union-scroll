@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      timeline_events: {
+        Row: {
+          body: string
+          created_at: string
+          era: string
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          sort_order: number
+          tag: string | null
+          title: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          era?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          sort_order?: number
+          tag?: string | null
+          title: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          era?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          sort_order?: number
+          tag?: string | null
+          title?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
