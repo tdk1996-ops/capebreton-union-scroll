@@ -1,29 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession, useIsAdmin } from "@/hooks/use-session";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import imgIbew from "@/assets/era-ibew.jpg";
 import imgEarly from "@/assets/era-early.jpg";
 import imgCoal from "@/assets/era-coal.jpg";
 import imgSteel from "@/assets/era-steel.jpg";
-import imgIbew from "@/assets/era-ibew.jpg";
 import imgStorm from "@/assets/era-storm.jpg";
 import imgDavis from "@/assets/era-davis.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cape Breton Union History — IBEW Local 1852" },
-      {
-        name: "description",
-        content:
-          "A horizontal timeline of the labour movement in Cape Breton, Nova Scotia, and the story of IBEW Local 1852.",
-      },
-      { property: "og:title", content: "Cape Breton Union History — IBEW Local 1852" },
-      {
-        property: "og:description",
-        content:
-          "From the coal pits of Glace Bay to the linemen of IBEW Local 1852 — a scrollable timeline of Cape Breton labour.",
-      },
-      { property: "og:type", content: "article" },
-      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: imgIbew },
       { name: "twitter:image", content: imgIbew },
     ],
@@ -34,207 +42,16 @@ export const Route = createFileRoute("/")({
 type Era = "early" | "coal" | "steel" | "modern" | "ibew";
 
 interface TimelineEvent {
+  id: string;
+  sort_order: number;
   year: string;
   title: string;
   body: string;
   era: Era;
-  tag?: string;
-  image: string;
-  imageAlt: string;
+  tag: string | null;
+  image_url: string | null;
+  image_alt: string | null;
 }
-
-
-const EVENTS: TimelineEvent[] = [
-  {
-    year: "1876",
-    era: "early",
-    title: "Provincial Workmen's Association founded",
-    body: "Robert Drummond organizes the PWA in Springhill — the first lasting miners' union in Canada. Its lodges spread quickly through Cape Breton's coalfields.",
-    image: imgEarly,
-    imageAlt: "Cape Breton coal miners with carbide lamps at a pit head, late 1800s",
-  },
-  {
-    year: "1882",
-    era: "coal",
-    title: "PWA reaches Cape Breton coalfields",
-    body: "Lodges open across Glace Bay, Sydney Mines and Reserve Mines, giving Cape Breton miners their first collective voice against the coal operators.",
-    image: imgEarly,
-    imageAlt: "Cape Breton miners posed outside a wooden pit head",
-  },
-  {
-    year: "1891",
-    era: "early",
-    tag: "Legislation",
-    title: "Nova Scotia Mines Regulation Act",
-    body: "After years of PWA lobbying, the province passes safety rules on ventilation, checkweighmen and boy labour — a rare early legislative win for organized labour.",
-    image: imgEarly,
-    imageAlt: "Vintage photograph of miners at a Nova Scotia colliery",
-  },
-  {
-    year: "1901",
-    era: "steel",
-    title: "Dominion Iron & Steel opens in Sydney",
-    body: "The Sydney steel plant fires up, drawing thousands of workers from across the Maritimes, Newfoundland and beyond. A new industrial working class takes shape.",
-    image: imgSteel,
-    imageAlt: "Sydney steel plant smokestacks at dusk with workers walking the yard",
-  },
-  {
-    year: "1909",
-    era: "coal",
-    tag: "Strike",
-    title: "UMW strike against Dominion Coal",
-    body: "The United Mine Workers of America challenges the PWA and Dominion Coal. Troops are sent to Glace Bay; strikers are evicted from company houses. The strike is broken, but the UMW takes root.",
-    image: imgCoal,
-    imageAlt: "1920s Cape Breton coal miners on a picket line holding a solidarity sign",
-  },
-  {
-    year: "1917",
-    era: "coal",
-    title: "UMW District 26 recognized",
-    body: "After years of dual unionism, District 26 of the UMWA becomes the recognized union of Nova Scotia coal miners, absorbing what remained of the PWA.",
-    image: imgCoal,
-    imageAlt: "Cape Breton miners assembled in a coal town street",
-  },
-  {
-    year: "1922",
-    era: "coal",
-    tag: "Strike",
-    title: "\"Standing the Gaff\"",
-    body: "BESCO slashes wages by up to a third. Miners strike under the slogan \"Standing the Gaff.\" J.B. McLachlan and Dan Livingstone lead a militant District 26.",
-    image: imgCoal,
-    imageAlt: "Striking Cape Breton coal miners in long coats and flat caps",
-  },
-  {
-    year: "1923",
-    era: "steel",
-    tag: "Strike",
-    title: "Sydney steelworkers' strike",
-    body: "Provincial police charge strikers and residents on a Sunday evening in Whitney Pier — \"Bloody Sunday.\" Miners walk out in sympathy; McLachlan is jailed for seditious libel.",
-    image: imgSteel,
-    imageAlt: "Sydney steel plant at dusk, workers silhouetted against furnace light",
-  },
-  {
-    year: "1925",
-    era: "coal",
-    tag: "Strike",
-    title: "The death of William Davis",
-    body: "During a five-month strike against BESCO, company police shoot miner William Davis at Waterford Lake, New Waterford. June 11 is still marked as Davis Day across Cape Breton.",
-    image: imgDavis,
-    imageAlt: "William Davis memorial in New Waterford with red carnations at the base",
-  },
-  {
-    year: "1935",
-    era: "steel",
-    title: "Steelworkers organize in Sydney",
-    body: "Sydney steelworkers begin organizing under what will become the United Steelworkers, winning recognition at the Sydney plant by the early 1940s (Local 1064).",
-    image: imgSteel,
-    imageAlt: "Sydney steel plant with tall smokestacks and workers in hard hats",
-  },
-  {
-    year: "1946",
-    era: "modern",
-    tag: "IBEW",
-    title: "IBEW Local 1852 chartered",
-    body: "The International Brotherhood of Electrical Workers charters Local 1852 to represent electrical workers on Cape Breton Island — linemen, powerhouse operators and inside wiremen serving a rapidly electrifying region.",
-    image: imgIbew,
-    imageAlt: "IBEW lineman climbing a wooden utility pole above the Cape Breton coast",
-  },
-  {
-    year: "1947",
-    era: "modern",
-    title: "Nova Scotia Power expands island-wide",
-    body: "Post-war rural electrification pushes lines into every corner of Cape Breton and northern mainland Nova Scotia. IBEW 1852 members string the wire that lights the coast.",
-    image: imgIbew,
-    imageAlt: "Lineman working on transmission lines along a coastal cliff",
-  },
-  {
-    year: "1967",
-    era: "coal",
-    title: "DEVCO takes over the coal mines",
-    body: "The Cape Breton Development Corporation is created to wind down and modernize the coal industry after Dominion Steel and Coal Corporation pulls out. Union locals fight to protect jobs.",
-    image: imgCoal,
-    imageAlt: "Cape Breton coal town workers gathered in the street",
-  },
-  {
-    year: "1967",
-    era: "steel",
-    title: "\"Parade of Concern\"",
-    body: "20,000 people march in Sydney after Hawker Siddeley announces it will close the steel plant. The province takes it over as Sydney Steel Corporation (Sysco).",
-    image: imgSteel,
-    imageAlt: "Sydney steel plant with billowing smoke",
-  },
-  {
-    year: "1972",
-    era: "modern",
-    tag: "IBEW",
-    title: "IBEW 1852 through the NS Power era",
-    body: "As the province consolidates utilities into Nova Scotia Power Corporation, Local 1852 becomes the core union for line and trades workers across Cape Breton and eastern Nova Scotia.",
-    image: imgIbew,
-    imageAlt: "IBEW lineman in orange gear on a wooden pole over the Atlantic",
-  },
-  {
-    year: "1992",
-    era: "modern",
-    tag: "IBEW",
-    title: "Privatization of Nova Scotia Power",
-    body: "NSPC is privatized into Nova Scotia Power Inc. IBEW 1852 negotiates through the transition, protecting pensions, seniority and the trades classifications members had built over decades.",
-    image: imgIbew,
-    imageAlt: "Lineman working overhead lines under a stormy sky",
-  },
-  {
-    year: "2001",
-    era: "steel",
-    title: "Sysco closes",
-    body: "The Sydney steel plant shuts down for good, ending a century of steelmaking on the harbour and leaving the tar ponds cleanup as its legacy.",
-    image: imgSteel,
-    imageAlt: "Sydney steel plant silhouetted against a burning orange sky",
-  },
-  {
-    year: "2001",
-    era: "coal",
-    title: "The last deep mine closes",
-    body: "Prince Colliery in Point Aconi is shuttered, ending large-scale underground coal mining in Cape Breton — the industry that built the island's unions.",
-    image: imgEarly,
-    imageAlt: "Cape Breton coal miners at a pit head",
-  },
-  {
-    year: "2003",
-    era: "modern",
-    tag: "IBEW",
-    title: "Storms, restorations, mutual aid",
-    body: "Hurricane Juan and later White Juan test the grid. IBEW 1852 crews work around the clock and host mutual-aid crews from across North America — a tradition that repeats with every major storm.",
-    image: imgStorm,
-    imageAlt: "Nighttime power restoration bucket truck beside a downed pole in the rain",
-  },
-  {
-    year: "2019",
-    era: "modern",
-    tag: "IBEW",
-    title: "Hurricane Dorian",
-    body: "Dorian knocks out power to over 400,000 Nova Scotians. Local 1852 line crews lead one of the largest restorations in provincial history.",
-    image: imgStorm,
-    imageAlt: "Line crew in bucket truck restoring power after a hurricane",
-  },
-  {
-    year: "2022",
-    era: "modern",
-    tag: "IBEW",
-    title: "Hurricane Fiona",
-    body: "Fiona devastates Cape Breton. IBEW 1852 members rebuild the grid pole by pole alongside mutual-aid crews from Ontario, Quebec, New Brunswick and Maine.",
-    image: imgStorm,
-    imageAlt: "Line crew working through storm damage at night",
-  },
-  {
-    year: "Today",
-    era: "ibew",
-    tag: "IBEW 1852",
-    title: "Powering Cape Breton",
-    body: "From the PWA lodges of the 1880s to linemen climbing in a January nor'easter, the through-line is the same: workers on this island organized, and stayed organized. IBEW Local 1852 carries that forward.",
-    image: imgIbew,
-    imageAlt: "IBEW lineman on a pole above the Cape Breton coast at sunrise",
-  },
-];
-
 
 const ERA_META: Record<Era, { label: string; dot: string; chip: string; accent: string }> = {
   early: {
@@ -269,20 +86,68 @@ const ERA_META: Record<Era, { label: string; dot: string; chip: string; accent: 
   },
 };
 
-// Unique backdrop images in the order they first appear along the timeline.
-const BACKDROPS: { src: string; alt: string }[] = [
-  { src: imgEarly, alt: "Early Cape Breton miners" },
-  { src: imgCoal, alt: "Coal miners on a picket line" },
-  { src: imgSteel, alt: "Sydney steel plant at dusk" },
-  { src: imgDavis, alt: "William Davis memorial" },
-  { src: imgIbew, alt: "IBEW lineman on the Cape Breton coast" },
-  { src: imgStorm, alt: "Storm restoration line crew" },
+// Fallback image per era so seeded rows without an image_url still look right.
+const FALLBACK_BY_ERA: Record<Era, string> = {
+  early: imgEarly,
+  coal: imgCoal,
+  steel: imgSteel,
+  modern: imgIbew,
+  ibew: imgIbew,
+};
+
+// Quick-pick presets when editing images.
+const PRESET_IMAGES: { label: string; url: string }[] = [
+  { label: "Early miners", url: imgEarly },
+  { label: "Coal picket line", url: imgCoal },
+  { label: "Sydney steel", url: imgSteel },
+  { label: "Davis memorial", url: imgDavis },
+  { label: "IBEW lineman", url: imgIbew },
+  { label: "Storm restoration", url: imgStorm },
 ];
+
+const asEra = (v: string): Era =>
+  (["early", "coal", "steel", "modern", "ibew"].includes(v) ? v : "modern") as Era;
+
+const resolveImage = (e: TimelineEvent) => e.image_url || FALLBACK_BY_ERA[e.era];
+
+function useEvents() {
+  return useQuery({
+    queryKey: ["timeline_events"],
+    queryFn: async (): Promise<TimelineEvent[]> => {
+      const { data, error } = await supabase
+        .from("timeline_events")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        id: r.id,
+        sort_order: r.sort_order,
+        year: r.year,
+        title: r.title,
+        body: r.body,
+        era: asEra(r.era),
+        tag: r.tag,
+        image_url: r.image_url,
+        image_alt: r.image_alt,
+      }));
+    },
+  });
+}
 
 function Index() {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [editMode, setEditMode] = useState(false);
+  const [editing, setEditing] = useState<TimelineEvent | "new" | null>(null);
+
+  const { session } = useSession();
+  const isAdmin = useIsAdmin(session?.user?.id);
+  const canEdit = editMode && isAdmin;
+
+  const { data: events = [], isLoading, error } = useEvents();
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["timeline_events"] });
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -291,12 +156,10 @@ function Index() {
       const max = el.scrollWidth - el.clientWidth;
       const p = max > 0 ? el.scrollLeft / max : 0;
       setProgress(p);
-      setActiveIdx(Math.round(p * (EVENTS.length - 1)));
+      setActiveIdx(Math.round(p * Math.max(events.length - 1, 0)));
     };
     onScroll();
     el.addEventListener("scroll", onScroll, { passive: true });
-
-    // Enable horizontal scroll via vertical wheel on desktop
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         el.scrollLeft += e.deltaY;
@@ -304,12 +167,11 @@ function Index() {
       }
     };
     el.addEventListener("wheel", onWheel, { passive: false });
-
     return () => {
       el.removeEventListener("scroll", onScroll);
       el.removeEventListener("wheel", onWheel);
     };
-  }, []);
+  }, [events.length]);
 
   const scrollBy = (dir: 1 | -1) => {
     const el = scrollerRef.current;
@@ -317,17 +179,57 @@ function Index() {
     el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
   };
 
-  const activeBackdrop = EVENTS[activeIdx]?.image ?? imgIbew;
+  const backdrops = useMemo(() => {
+    const seen = new Set<string>();
+    const list: string[] = [];
+    for (const e of events) {
+      const src = resolveImage(e);
+      if (!seen.has(src)) {
+        seen.add(src);
+        list.push(src);
+      }
+    }
+    return list;
+  }, [events]);
 
+  const activeBackdrop = events[activeIdx] ? resolveImage(events[activeIdx]) : imgIbew;
+
+  const handleMove = async (e: TimelineEvent, dir: -1 | 1) => {
+    const idx = events.findIndex((x) => x.id === e.id);
+    const swap = events[idx + dir];
+    if (!swap) return;
+    const { error: err1 } = await supabase
+      .from("timeline_events")
+      .update({ sort_order: swap.sort_order })
+      .eq("id", e.id);
+    const { error: err2 } = await supabase
+      .from("timeline_events")
+      .update({ sort_order: e.sort_order })
+      .eq("id", swap.id);
+    if (err1 || err2) toast.error((err1 || err2)!.message);
+    else invalidate();
+  };
+
+  const handleDelete = async (e: TimelineEvent) => {
+    if (!confirm(`Delete "${e.title}"?`)) return;
+    const { error: err } = await supabase.from("timeline_events").delete().eq("id", e.id);
+    if (err) toast.error(err.message);
+    else {
+      toast.success("Deleted");
+      invalidate();
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setEditMode(false);
+    toast.success("Signed out");
+  };
 
   return (
     <div
       className="min-h-screen text-foreground"
       style={{
-        // Local design tokens for era colors, so we don't hardcode in components.
-        // Coal black, steel amber, sea/modern teal, IBEW electric.
-        // Kept scoped to this page.
-        // eslint-disable-next-line @typescript-eslint/consestent-type-assertions
         ["--era-early" as string]: "oklch(0.55 0.09 40)",
         ["--era-coal" as string]: "oklch(0.35 0.02 260)",
         ["--era-steel" as string]: "oklch(0.62 0.16 55)",
@@ -336,7 +238,40 @@ function Index() {
         backgroundColor: "var(--color-background)",
       }}
     >
-      <div className="mx-auto max-w-7xl px-6 pt-12 pb-6 sm:pt-16">
+      {/* Top bar */}
+      <div className="mx-auto flex max-w-7xl items-center justify-end gap-2 px-6 pt-4 text-sm">
+        {!session ? (
+          <Link
+            to="/auth"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Sign in to edit
+          </Link>
+        ) : (
+          <>
+            {isAdmin && (
+              <button
+                onClick={() => setEditMode((v) => !v)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                  editMode
+                    ? "border-[color:var(--era-ibew)] bg-[color:var(--era-ibew)]/15 text-[color:var(--era-ibew)]"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {editMode ? "Editing ON" : "Enable editing"}
+              </button>
+            )}
+            <button
+              onClick={handleSignOut}
+              className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Sign out
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 pt-6 pb-6 sm:pt-8">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-6">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -369,7 +304,7 @@ function Index() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-2">
+        <div className="mt-8 flex flex-wrap items-center gap-2">
           {(Object.keys(ERA_META) as Era[]).map((era) => (
             <span
               key={era}
@@ -379,6 +314,15 @@ function Index() {
               {ERA_META[era].label}
             </span>
           ))}
+          {canEdit && (
+            <Button
+              size="sm"
+              onClick={() => setEditing("new")}
+              className="ml-auto"
+            >
+              + Add event
+            </Button>
+          )}
         </div>
 
         <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-muted">
@@ -390,21 +334,17 @@ function Index() {
       </div>
 
       <div className="relative">
-        {/* Cross-fading era backdrop, sits behind the scrolling timeline */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-        >
-          {BACKDROPS.map((b) => (
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {backdrops.map((src) => (
             <img
-              key={b.src}
-              src={b.src}
+              key={src}
+              src={src}
               alt=""
               width={1280}
               height={800}
               loading="lazy"
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
-                b.src === activeBackdrop ? "opacity-25" : "opacity-0"
+                src === activeBackdrop ? "opacity-25" : "opacity-0"
               }`}
               style={{ filter: "saturate(0.85)" }}
             />
@@ -418,21 +358,42 @@ function Index() {
           style={{ scrollbarWidth: "thin" }}
         >
           <div className="relative min-w-max px-6 pt-10">
-            {/* Rail */}
             <div className="pointer-events-none absolute left-6 right-6 top-[300px] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
+            {isLoading && (
+              <div className="grid h-[420px] place-items-center text-sm text-muted-foreground">
+                Loading timeline…
+              </div>
+            )}
+            {error && (
+              <div className="grid h-[420px] place-items-center text-sm text-destructive">
+                Couldn't load events.
+              </div>
+            )}
+
             <ol className="relative flex items-stretch gap-6">
-              {EVENTS.map((e, i) => {
+              {events.map((e, i) => {
                 const meta = ERA_META[e.era];
                 const above = i % 2 === 0;
+                const card = (
+                  <EventCard
+                    event={e}
+                    meta={meta}
+                    canEdit={canEdit}
+                    onEdit={() => setEditing(e)}
+                    onDelete={() => handleDelete(e)}
+                    onMoveLeft={i > 0 ? () => handleMove(e, -1) : undefined}
+                    onMoveRight={i < events.length - 1 ? () => handleMove(e, 1) : undefined}
+                  />
+                );
                 return (
                   <li
-                    key={`${e.year}-${e.title}-${i}`}
+                    key={e.id}
                     className="relative flex w-[320px] shrink-0 flex-col sm:w-[360px]"
                   >
                     {above ? (
                       <>
-                        <EventCard event={e} meta={meta} />
+                        {card}
                         <div className="relative flex h-[72px] items-start justify-center">
                           <div className={`h-full w-px ${meta.dot}`} />
                           <span
@@ -451,7 +412,7 @@ function Index() {
                           <div className={`h-full w-px ${meta.dot}`} />
                         </div>
                         <YearLabel year={e.year} meta={meta} />
-                        <EventCard event={e} meta={meta} className="mt-4" />
+                        <div className="mt-4">{card}</div>
                       </>
                     )}
                   </li>
@@ -461,7 +422,6 @@ function Index() {
           </div>
         </div>
       </div>
-
 
       <footer className="mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -484,6 +444,18 @@ function Index() {
           Scroll sideways · drag · or use ← → to move through the timeline.
         </p>
       </footer>
+
+      {editing && (
+        <EditDialog
+          initial={editing === "new" ? null : editing}
+          maxOrder={events.reduce((m, e) => Math.max(m, e.sort_order), 0)}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            invalidate();
+            setEditing(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -505,20 +477,27 @@ function YearLabel({
 function EventCard({
   event,
   meta,
-  className = "",
+  canEdit,
+  onEdit,
+  onDelete,
+  onMoveLeft,
+  onMoveRight,
 }: {
   event: TimelineEvent;
   meta: (typeof ERA_META)[Era];
-  className?: string;
+  canEdit: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onMoveLeft?: () => void;
+  onMoveRight?: () => void;
 }) {
+  const img = resolveImage(event);
   return (
-    <article
-      className={`group relative flex min-h-[372px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${className}`}
-    >
+    <article className="group relative flex min-h-[372px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative h-40 w-full overflow-hidden">
         <img
-          src={event.image}
-          alt={event.imageAlt}
+          src={img}
+          alt={event.image_alt ?? event.title}
           width={1280}
           height={800}
           loading="lazy"
@@ -533,12 +512,177 @@ function EventCard({
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-lg font-bold leading-snug text-card-foreground">
-          {event.title}
-        </h3>
+        <h3 className="text-lg font-bold leading-snug text-card-foreground">{event.title}</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{event.body}</p>
       </div>
+
+      {canEdit && (
+        <div className="absolute inset-x-2 top-2 flex justify-end gap-1">
+          <button
+            type="button"
+            onClick={onMoveLeft}
+            disabled={!onMoveLeft}
+            title="Move earlier"
+            className="grid h-7 w-7 place-items-center rounded-full bg-background/90 text-xs shadow-sm ring-1 ring-border disabled:opacity-30"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            onClick={onMoveRight}
+            disabled={!onMoveRight}
+            title="Move later"
+            className="grid h-7 w-7 place-items-center rounded-full bg-background/90 text-xs shadow-sm ring-1 ring-border disabled:opacity-30"
+          >
+            →
+          </button>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium shadow-sm ring-1 ring-border"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-full bg-destructive/90 px-2.5 py-1 text-xs font-medium text-destructive-foreground shadow-sm"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </article>
   );
 }
 
+function EditDialog({
+  initial,
+  maxOrder,
+  onClose,
+  onSaved,
+}: {
+  initial: TimelineEvent | null;
+  maxOrder: number;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [year, setYear] = useState(initial?.year ?? "");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [body, setBody] = useState(initial?.body ?? "");
+  const [era, setEra] = useState<Era>(initial?.era ?? "modern");
+  const [tag, setTag] = useState(initial?.tag ?? "");
+  const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [imageAlt, setImageAlt] = useState(initial?.image_alt ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!year.trim() || !title.trim() || !body.trim()) {
+      toast.error("Year, title and description are required");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      year: year.trim().slice(0, 40),
+      title: title.trim().slice(0, 200),
+      body: body.trim().slice(0, 2000),
+      era,
+      tag: tag.trim() ? tag.trim().slice(0, 40) : null,
+      image_url: imageUrl.trim() ? imageUrl.trim().slice(0, 1000) : null,
+      image_alt: imageAlt.trim() ? imageAlt.trim().slice(0, 300) : null,
+    };
+    const res = initial
+      ? await supabase.from("timeline_events").update(payload).eq("id", initial.id)
+      : await supabase
+          .from("timeline_events")
+          .insert({ ...payload, sort_order: maxOrder + 10 });
+    setSaving(false);
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    toast.success(initial ? "Updated" : "Added");
+    onSaved();
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{initial ? "Edit event" : "Add event"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-[1fr_1fr] gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="year">Year / label</Label>
+              <Input id="year" value={year} onChange={(e) => setYear(e.target.value)} placeholder="1946" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Era</Label>
+              <Select value={era} onValueChange={(v) => setEra(v as Era)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(ERA_META) as Era[]).map((k) => (
+                    <SelectItem key={k} value={k}>
+                      {ERA_META[k].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="title">Title</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="body">Description</Label>
+            <Textarea id="body" rows={4} value={body} onChange={(e) => setBody(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tag">Tag (optional)</Label>
+            <Input id="tag" value={tag} onChange={(e) => setTag(e.target.value)} placeholder="Strike, IBEW, Legislation…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="image">Image URL (optional)</Label>
+            <Input
+              id="image"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://…"
+            />
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {PRESET_IMAGES.map((p) => (
+                <button
+                  key={p.url}
+                  type="button"
+                  onClick={() => setImageUrl(p.url)}
+                  className={`overflow-hidden rounded-md ring-1 ring-border transition ${
+                    imageUrl === p.url ? "ring-2 ring-primary" : "hover:ring-foreground/40"
+                  }`}
+                  title={p.label}
+                >
+                  <img src={p.url} alt={p.label} className="h-10 w-16 object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="alt">Image alt text</Label>
+            <Input id="alt" value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? "Saving…" : initial ? "Save" : "Add event"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
