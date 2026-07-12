@@ -60,8 +60,13 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-bold">{mode === "signin" ? "Sign in" : "Create account"}</h1>
+      <div className="w-full max-w-sm rounded-sm border border-foreground/15 bg-card p-6 shadow-sm">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          The Cape Breton Labour Record · IBEW Local 1852
+        </p>
+        <h1 className="mt-2 font-serif text-3xl font-black tracking-tight">
+          {mode === "signin" ? "Sign in" : "Create account"}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {mode === "signin"
             ? "Sign in to edit the timeline."

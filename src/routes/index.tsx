@@ -22,6 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import imgIbew from "@/assets/era-ibew.jpg";
 import imgEarly from "@/assets/era-early.jpg";
 import imgCoal from "@/assets/era-coal.jpg";
@@ -230,76 +239,93 @@ function Index() {
     <div
       className="min-h-screen text-foreground"
       style={{
-        ["--era-early" as string]: "oklch(0.55 0.09 40)",
-        ["--era-coal" as string]: "oklch(0.35 0.02 260)",
-        ["--era-steel" as string]: "oklch(0.62 0.16 55)",
-        ["--era-modern" as string]: "oklch(0.55 0.12 200)",
-        ["--era-ibew" as string]: "oklch(0.72 0.19 85)",
+        ["--era-early" as string]: "oklch(0.47 0.08 45)",
+        ["--era-coal" as string]: "oklch(0.32 0.02 260)",
+        ["--era-steel" as string]: "oklch(0.53 0.16 45)",
+        ["--era-modern" as string]: "oklch(0.48 0.11 215)",
+        ["--era-ibew" as string]: "oklch(0.6 0.15 72)",
         backgroundColor: "var(--color-background)",
       }}
     >
-      {/* Top bar */}
-      <div className="mx-auto flex max-w-7xl items-center justify-end gap-2 px-6 pt-4 text-sm">
-        {!session ? (
-          <Link
-            to="/auth"
-            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Sign in to edit
-          </Link>
-        ) : (
-          <>
-            {isAdmin && (
-              <button
-                onClick={() => setEditMode((v) => !v)}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                  editMode
-                    ? "border-[color:var(--era-ibew)] bg-[color:var(--era-ibew)]/15 text-[color:var(--era-ibew)]"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
+      {/* Masthead */}
+      <header className="border-b border-foreground/15">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-8 w-8 place-items-center rounded-sm bg-foreground text-[color:var(--color-background)]">
+              <span className="font-serif text-sm font-black leading-none">L</span>
+            </span>
+            <div className="leading-tight">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em]">The Cape Breton Labour Record</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                IBEW Local 1852 · Est. 1946
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            {!session ? (
+              <Link
+                to="/auth"
+                className="rounded-sm border border-foreground/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition hover:border-foreground/40 hover:text-foreground"
               >
-                {editMode ? "Editing ON" : "Enable editing"}
-              </button>
+                Sign in
+              </Link>
+            ) : (
+              <>
+                {isAdmin && (
+                  <button
+                    onClick={() => setEditMode((v) => !v)}
+                    className={`rounded-sm border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition ${
+                      editMode
+                        ? "border-[color:var(--era-ibew)] bg-[color:var(--era-ibew)]/15 text-[color:var(--era-ibew)]"
+                        : "border-foreground/20 text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+                    }`}
+                  >
+                    {editMode ? "Editing" : "Edit"}
+                  </button>
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="rounded-sm border border-foreground/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition hover:border-foreground/40 hover:text-foreground"
+                >
+                  Sign out
+                </button>
+              </>
             )}
-            <button
-              onClick={handleSignOut}
-              className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              Sign out
-            </button>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </header>
 
-      <div className="mx-auto max-w-7xl px-6 pt-6 pb-6 sm:pt-8">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-6">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Cape Breton · Nova Scotia
+      <div className="mx-auto max-w-7xl px-4 pt-8 pb-6 sm:px-6 sm:pt-12">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 max-w-3xl">
+            <p className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+              <span className="h-px w-8 bg-[color:var(--era-ibew)]" />
+              Cape Breton · Nova Scotia · 1876—Today
             </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">
-              A Coast That <span className="italic text-[color:var(--era-ibew)]">Organized</span>.
+            <h1 className="mt-4 text-balance font-serif text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl">
+              A Coast That{" "}
+              <span className="italic font-semibold text-[color:var(--era-ibew)]">Organized</span>.
             </h1>
-            <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
+            <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               From the coal pits of Glace Bay and the steel plant in Sydney to the line trucks of
-              IBEW Local 1852 — scroll the timeline sideways to walk through 150 years of Cape
-              Breton labour history.
+              IBEW Local 1852 — walk the timeline sideways through 150 years of Cape Breton labour
+              history.
             </p>
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             <button
               onClick={() => scrollBy(-1)}
               aria-label="Scroll timeline left"
-              className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground transition hover:bg-accent"
+              className="grid h-11 w-11 place-items-center rounded-sm border border-foreground/20 bg-card text-foreground transition hover:border-foreground/40 hover:bg-secondary"
             >
-              ←
+              <ArrowLeft className="h-5 w-5" strokeWidth={2} />
             </button>
             <button
               onClick={() => scrollBy(1)}
               aria-label="Scroll timeline right"
-              className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground transition hover:bg-accent"
+              className="grid h-11 w-11 place-items-center rounded-sm border border-foreground/20 bg-card text-foreground transition hover:border-foreground/40 hover:bg-secondary"
             >
-              →
+              <ArrowRight className="h-5 w-5" strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -308,7 +334,7 @@ function Index() {
           {(Object.keys(ERA_META) as Era[]).map((era) => (
             <span
               key={era}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${ERA_META[era].chip}`}
+              className={`inline-flex items-center gap-2 rounded-sm border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${ERA_META[era].chip}`}
             >
               <span className={`h-1.5 w-1.5 rounded-full ${ERA_META[era].dot}`} />
               {ERA_META[era].label}
@@ -318,18 +344,23 @@ function Index() {
             <Button
               size="sm"
               onClick={() => setEditing("new")}
-              className="ml-auto"
+              className="ml-auto gap-1.5 rounded-sm"
             >
-              + Add event
+              <Plus className="h-4 w-4" /> Add event
             </Button>
           )}
         </div>
 
-        <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-[color:var(--era-ibew)] transition-[width] duration-150"
-            style={{ width: `${Math.max(4, progress * 100)}%` }}
-          />
+        <div className="mt-6 flex items-center gap-4">
+          <div className="h-[3px] w-full overflow-hidden rounded-full bg-foreground/10">
+            <div
+              className="h-full rounded-full bg-[color:var(--era-ibew)] transition-[width] duration-150"
+              style={{ width: `${Math.max(4, progress * 100)}%` }}
+            />
+          </div>
+          <span className="shrink-0 font-mono text-xs font-semibold tabular-nums text-muted-foreground">
+            {String(Math.round(progress * 100)).padStart(2, "0")}%
+          </span>
         </div>
       </div>
 
@@ -344,21 +375,21 @@ function Index() {
               height={800}
               loading="lazy"
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
-                src === activeBackdrop ? "opacity-25" : "opacity-0"
+                src === activeBackdrop ? "opacity-[0.14]" : "opacity-0"
               }`}
-              style={{ filter: "saturate(0.85)" }}
+              style={{ filter: "saturate(0.55) sepia(0.2)" }}
             />
           ))}
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/70 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/85 to-background" />
         </div>
 
         <div
           ref={scrollerRef}
-          className="relative w-full overflow-x-auto overflow-y-hidden pb-16"
+          className="timeline-scroll relative w-full overflow-x-auto overflow-y-hidden pb-16"
           style={{ scrollbarWidth: "thin" }}
         >
-          <div className="relative min-w-max px-6 pt-10">
-            <div className="pointer-events-none absolute left-6 right-6 top-[300px] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="relative min-w-max px-4 pt-10 sm:px-6">
+            <div className="pointer-events-none absolute left-6 right-6 top-[300px] h-px bg-gradient-to-r from-transparent via-foreground/25 to-transparent" />
 
             {isLoading && (
               <div className="grid h-[420px] place-items-center text-sm text-muted-foreground">
@@ -423,16 +454,18 @@ function Index() {
         </div>
       </div>
 
-      <footer className="mx-auto max-w-7xl px-6 pb-16">
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <footer className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+        <div className="rounded-sm border border-foreground/15 bg-card p-6 sm:p-10">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--era-ibew)]/40 bg-[color:var(--era-ibew)]/15 px-3 py-1 text-xs font-semibold text-[color:var(--era-ibew)]">
+            <span className="inline-flex items-center gap-2 rounded-sm border border-[color:var(--era-ibew)]/40 bg-[color:var(--era-ibew)]/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[color:var(--era-ibew)]">
               <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--era-ibew)]" />
               IBEW Local 1852
             </span>
-            <h2 className="text-xl font-bold sm:text-2xl">Our local, in one line.</h2>
+            <h2 className="font-serif text-2xl font-black tracking-tight sm:text-3xl">
+              Our local, in one line.
+            </h2>
           </div>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-4 max-w-3xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
             Chartered in 1946, IBEW Local 1852 represents electrical workers across Cape Breton and
             eastern Nova Scotia — the linemen, powerline technicians, powerhouse operators and
             trades who keep the lights on through nor'easters, hurricanes and everything in
@@ -440,8 +473,8 @@ function Index() {
             steelworkers of Whitney Pier. Same island. Same fight.
           </p>
         </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Scroll sideways · drag · or use ← → to move through the timeline.
+        <p className="mt-6 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Scroll sideways · drag · or use ← → to move through the timeline
         </p>
       </footer>
 
@@ -469,7 +502,9 @@ function YearLabel({
 }) {
   return (
     <div className="flex justify-center">
-      <span className={`text-3xl font-black tracking-tight ${meta.accent}`}>{year}</span>
+      <span className={`font-serif text-3xl font-black tabular-nums tracking-tight sm:text-4xl ${meta.accent}`}>
+        {year}
+      </span>
     </div>
   );
 }
@@ -493,26 +528,29 @@ function EventCard({
 }) {
   const img = resolveImage(event);
   return (
-    <article className="group relative flex min-h-[372px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative h-40 w-full overflow-hidden">
+    <article className="group relative flex min-h-[372px] flex-col overflow-hidden rounded-sm border border-foreground/15 bg-card shadow-[0_1px_0_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:border-foreground/30 hover:shadow-[0_12px_30px_-12px_rgba(0,0,0,0.35)]">
+      <div className="relative h-44 w-full overflow-hidden">
         <img
           src={img}
           alt={event.image_alt ?? event.title}
           width={1280}
           height={800}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover grayscale-[0.35] transition-all duration-700 group-hover:scale-[1.06] group-hover:grayscale-0"
+          style={{ filter: "sepia(0.15)" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-card/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/10 to-transparent" />
         <span
-          className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur ${meta.chip}`}
+          className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] backdrop-blur-sm ${meta.chip}`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
           {event.tag ?? meta.label}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-lg font-bold leading-snug text-card-foreground">{event.title}</h3>
+        <h3 className="font-serif text-xl font-bold leading-snug text-card-foreground">
+          {event.title}
+        </h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{event.body}</p>
       </div>
 
@@ -523,32 +561,34 @@ function EventCard({
             onClick={onMoveLeft}
             disabled={!onMoveLeft}
             title="Move earlier"
-            className="grid h-7 w-7 place-items-center rounded-full bg-background/90 text-xs shadow-sm ring-1 ring-border disabled:opacity-30"
+            className="grid h-7 w-7 place-items-center rounded-sm bg-background/95 shadow-sm ring-1 ring-foreground/15 transition hover:ring-foreground/40 disabled:opacity-30"
           >
-            ←
+            <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={onMoveRight}
             disabled={!onMoveRight}
             title="Move later"
-            className="grid h-7 w-7 place-items-center rounded-full bg-background/90 text-xs shadow-sm ring-1 ring-border disabled:opacity-30"
+            className="grid h-7 w-7 place-items-center rounded-sm bg-background/95 shadow-sm ring-1 ring-foreground/15 transition hover:ring-foreground/40 disabled:opacity-30"
           >
-            →
+            <ChevronRight className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium shadow-sm ring-1 ring-border"
+            title="Edit"
+            className="grid h-7 w-7 place-items-center rounded-sm bg-background/95 shadow-sm ring-1 ring-foreground/15 transition hover:ring-foreground/40"
           >
-            Edit
+            <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="rounded-full bg-destructive/90 px-2.5 py-1 text-xs font-medium text-destructive-foreground shadow-sm"
+            title="Delete"
+            className="grid h-7 w-7 place-items-center rounded-sm bg-destructive/95 text-destructive-foreground shadow-sm transition hover:bg-destructive"
           >
-            Delete
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
