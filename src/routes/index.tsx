@@ -645,33 +645,67 @@ function EditDialog({
             <Label htmlFor="tag">Tag (optional)</Label>
             <Input id="tag" value={tag} onChange={(e) => setTag(e.target.value)} placeholder="Strike, IBEW, Legislation…" />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="image">Image URL (optional)</Label>
-            <Input
-              id="image"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://…"
-            />
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {PRESET_IMAGES.map((p) => (
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+            <Label>Image</Label>
+            {imageUrl && (
+              <div className="relative overflow-hidden rounded-md border border-border">
+                <img src={imageUrl} alt="preview" className="h-32 w-full object-cover" />
                 <button
-                  key={p.url}
                   type="button"
-                  onClick={() => setImageUrl(p.url)}
-                  className={`overflow-hidden rounded-md ring-1 ring-border transition ${
-                    imageUrl === p.url ? "ring-2 ring-primary" : "hover:ring-foreground/40"
-                  }`}
-                  title={p.label}
+                  onClick={() => setImageUrl("")}
+                  className="absolute right-2 top-2 rounded-full bg-background/90 px-2 py-0.5 text-xs shadow ring-1 ring-border"
                 >
-                  <img src={p.url} alt={p.label} className="h-10 w-16 object-cover" />
+                  Remove
                 </button>
-              ))}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <label
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition hover:bg-accent ${
+                  uploading ? "pointer-events-none opacity-60" : ""
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                {uploading ? "Uploading…" : imageUrl ? "Replace image" : "Upload image"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleUpload(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <span className="text-xs text-muted-foreground">PNG, JPG, WebP · max 10MB</span>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <Label htmlFor="image" className="text-xs text-muted-foreground">Or paste an image URL</Label>
+              <Input id="image" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" />
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <Label className="text-xs text-muted-foreground">Or pick a preset</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_IMAGES.map((p) => (
+                  <button
+                    key={p.url}
+                    type="button"
+                    onClick={() => setImageUrl(p.url)}
+                    className={`overflow-hidden rounded-md ring-1 ring-border transition ${
+                      imageUrl === p.url ? "ring-2 ring-primary" : "hover:ring-foreground/40"
+                    }`}
+                    title={p.label}
+                  >
+                    <img src={p.url} alt={p.label} className="h-10 w-16 object-cover" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="alt">Image alt text</Label>
-            <Input id="alt" value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} />
+            <Label htmlFor="alt">Image alt text (describe the image)</Label>
+            <Input id="alt" value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} placeholder="e.g. IBEW linemen restoring power after a storm" />
           </div>
         </div>
         <DialogFooter>
